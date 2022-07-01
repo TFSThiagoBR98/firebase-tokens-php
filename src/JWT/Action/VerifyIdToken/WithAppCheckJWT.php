@@ -88,12 +88,6 @@ final class WithAppCheckJWT implements Handler
 
         try {
             $this->validator->assert($token, ...$constraints);
-
-            $this->assertUserAuthedAt($token, $clock->now()->add($leeway));
-
-            if ($tenantId = $action->expectedTenantId()) {
-                $this->assertTenantId($token, $tenantId);
-            }
         } catch (RequiredConstraintsViolated $e) {
             $errors = \array_map(
                 static fn (ConstraintViolation $violation): string => '- '.$violation->getMessage(),
@@ -142,46 +136,5 @@ final class WithAppCheckJWT implements Handler
         }
 
         throw IdTokenVerificationFailed::withTokenAndReasons($token->toString(), ["No public key matching the key ID '{$keyId}' was found to verify the signature of this token."]);
-    }
-
-    private function assertUserAuthedAt(UnencryptedToken $token, DateTimeInterface $now): void
-    {
-        /** @var int|DateTimeImmutable $authTime */
-        $authTime = $token->claims()->get('auth_time');
-
-        if (!$authTime) {
-            throw RequiredConstraintsViolated::fromViolations(
-                new ConstraintViolation('The token is missing the "auth_time" claim.')
-            );
-        }
-
-        if (\is_numeric($authTime)) {
-            $authTime = new DateTimeImmutable('@'.((int) $authTime));
-        }
-
-        if ($now < $authTime) {
-            throw RequiredConstraintsViolated::fromViolations(
-                new ConstraintViolation("The token's user must have authenticated in the past")
-            );
-        }
-    }
-
-    private function assertTenantId(UnencryptedToken $token, string $tenantId): void
-    {
-        $claim = (array) $token->claims()->get('firebase', []);
-
-        $tenant = $claim['tenant'] ?? null;
-
-        if (!\is_string($tenant)) {
-            throw RequiredConstraintsViolated::fromViolations(
-                new ConstraintViolation('The ID token does not contain a tenant identifier')
-            );
-        }
-
-        if ($tenant !== $tenantId) {
-            throw RequiredConstraintsViolated::fromViolations(
-                new ConstraintViolation("The token's tenant ID did not match with the expected tenant ID")
-            );
-        }
     }
 }

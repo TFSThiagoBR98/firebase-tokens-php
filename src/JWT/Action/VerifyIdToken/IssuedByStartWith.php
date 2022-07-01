@@ -21,7 +21,7 @@ final class IssuedByStartWith implements Constraint
 
     public function asIssued(Token $token, string ...$issuers): bool
     {
-        $tokenIssuer = $token->claims->get(RegisteredClaims::ISSUER);
+        $tokenIssuer = $token->claims()->get(RegisteredClaims::ISSUER);
         foreach ($issuers as $issuer) {
             if (str_starts_with($tokenIssuer, $issuer)) {
                 return true;
