@@ -78,7 +78,7 @@ final class WithAppCheckJWT implements Handler
         $constraints = [
             new LooseValidAt($clock, $leeway),
             new IssuedBy(...["https://firebaseappcheck.googleapis.com/{$this->projectId}"]),
-            new PermittedFor($this->projectId),
+            new PermittedFor("projects/" . $this->projectId),
         ];
 
         if ($key !== '' && Util::authEmulatorHost() === '') {

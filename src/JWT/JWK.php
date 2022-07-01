@@ -86,7 +86,7 @@ class JWK
         foreach ($jwks['keys'] as $k => $v) {
             $kid = isset($v['kid']) ? $v['kid'] : $k;
             if ($key = self::parseKey($v, $defaultAlg)) {
-                $keys[(string) $kid] = $key->getKeyMaterial();
+                $keys[(string) $kid] = \openssl_pkey_get_details($key->getKeyMaterial())['key'];
             }
         }
 
