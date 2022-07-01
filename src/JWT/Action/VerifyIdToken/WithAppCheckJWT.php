@@ -10,6 +10,7 @@ use DateTimeInterface;
 use Kreait\Firebase\JWT\Action\VerifyIdToken;
 use Kreait\Firebase\JWT\Contract\Keys;
 use Kreait\Firebase\JWT\Contract\Token;
+use Kreait\Firebase\JWT\Action\VerifyIdToken\IssuedByStartWith;
 use Kreait\Firebase\JWT\Error\IdTokenVerificationFailed;
 use Kreait\Firebase\JWT\Token as TokenInstance;
 use Kreait\Firebase\JWT\Util;
@@ -20,8 +21,8 @@ use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Signer\None;
 use Lcobucci\JWT\Signer\Rsa\Sha256;
 use Lcobucci\JWT\Token\Parser;
+use Lcobucci\JWT\Token\RegisteredClaims;
 use Lcobucci\JWT\UnencryptedToken;
-use Lcobucci\JWT\Validation\Constraint\IssuedBy;
 use Lcobucci\JWT\Validation\Constraint\LooseValidAt;
 use Lcobucci\JWT\Validation\Constraint\PermittedFor;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
@@ -77,7 +78,7 @@ final class WithAppCheckJWT implements Handler
 
         $constraints = [
             new LooseValidAt($clock, $leeway),
-            new IssuedBy(...["https://firebaseappcheck.googleapis.com/{$this->projectId}"]),
+            new IssuedByStartWith(...["https://firebaseappcheck.googleapis.com/"]),
             new PermittedFor("projects/" . $this->projectId),
         ];
 
